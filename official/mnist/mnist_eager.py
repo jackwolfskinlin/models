@@ -27,7 +27,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import sys
 import time
 
 # pylint: disable=g-bad-import-order
@@ -98,12 +97,17 @@ def test(model, dataset):
     tf.contrib.summary.scalar('accuracy', accuracy.result())
 
 
-def main(flags_obj):
+def run_mnist_eager(flags_obj):
+  """Run MNIST training and eval loop in eager mode.
+
+  Args:
+    flags_obj: An object containing parsed flag values.
+  """
   tf.enable_eager_execution()
 
   # Automatically determine device and data_format
   (device, data_format) = ('/gpu:0', 'channels_first')
-  if flags_obj.no_gpu or tf.test.is_gpu_available():
+  if flags_obj.no_gpu or not tf.test.is_gpu_available():
     (device, data_format) = ('/cpu:0', 'channels_last')
   # If data_format is defined in FLAGS, overwrite automatically set value.
   if flags_obj.data_format is not None:
@@ -191,6 +195,11 @@ def define_mnist_eager_flags():
       batch_size=100,
       train_epochs=10,
   )
+
+
+def main(_):
+  run_mnist_eager(flags.FLAGS)
+
 
 if __name__ == '__main__':
   define_mnist_eager_flags()
